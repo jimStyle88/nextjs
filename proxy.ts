@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Next.js 16的proxy功能 - 必须放在app目录下
 export function proxy(request: NextRequest) {
   console.log('=== PROXY TRIGGERED ===');
   console.log('Path:', request.nextUrl.pathname);
