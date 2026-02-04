@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Button } from 'antd';
 
 export default function Home() {
   return (
@@ -65,6 +66,7 @@ export default function Home() {
           >
             API Test Page
           </Link>
+           <Button type="primary">Button</Button>
         </div>
       </main>
     </div>
