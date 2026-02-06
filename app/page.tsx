@@ -66,7 +66,13 @@ export default function Home() {
           >
             API Test Page
           </Link>
-           <Button type="primary">Button</Button>
+          <Link
+            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-blue-500 bg-blue-50 text-blue-600 transition-colors hover:border-blue-600 hover:bg-blue-100 dark:border-blue-400 dark:bg-blue-900/30 dark:text-blue-400 md:w-[158px]"
+            href="/formPage"
+          >
+            form Page
+          </Link>
+          
         </div>
       </main>
     </div>
