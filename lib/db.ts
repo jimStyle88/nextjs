@@ -11,6 +11,9 @@ const dbConfig = {
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
+    // 处理 bigint 类型，避免 JavaScript 精度丢失
+    supportBigNumbers: true,
+    bigNumberStrings: true,
 };
 
 // 创建连接池

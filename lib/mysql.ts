@@ -28,9 +28,13 @@ export async function insert(
     table: string,
     data: Record<string, any>
 ): Promise<ResultSetHeader> {
-    const keys = Object.keys(data).join(', ');
-    const placeholders = Object.keys(data).map(() => '?').join(', ');
-    const values = Object.values(data);
+    // 排除 id 字段，让数据库自动生成
+    const filteredData = { ...data };
+    delete filteredData.id;
+
+    const keys = Object.keys(filteredData).join(', ');
+    const placeholders = Object.keys(filteredData).map(() => '?').join(', ');
+    const values = Object.values(filteredData);
 
     const sql = `INSERT INTO ${table} (${keys}) VALUES (${placeholders})`;
 

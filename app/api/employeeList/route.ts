@@ -49,11 +49,12 @@ export async function GET(req: NextRequest) {
         }
 
         if (keyword) {
-            whereConditions.push('(name LIKE ? OR value LIKE ? OR description LIKE ?)');
+            whereConditions.push('(name LIKE ? OR status LIKE ? OR description LIKE ?)');
             params.push(`%${keyword}%`, `%${keyword}%`, `%${keyword}%`);
         }
 
         const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
+        console.log("dataSql:------", whereClause);
 
         // 获取总数
         const countSql = `SELECT COUNT(*) as total FROM employeelist ${whereClause}`;
@@ -63,14 +64,19 @@ export async function GET(req: NextRequest) {
         // 获取分页数据 - 修复参数不匹配问题
         const offset = (page - 1) * pageSize;
         const dataSql = `SELECT * FROM employeelist ${whereClause} ORDER BY id DESC LIMIT ${pageSize} OFFSET ${offset}`;
-
         // 使用字符串插值而不是参数传递，避免参数不匹配
         const rows = await query<EnumItem[]>(dataSql, params);
+
+        // 转换 ID 为字符串，避免 JavaScript 精度丢失
+        const formattedRows = rows.map(row => ({
+            ...row,
+            id: row.id.toString()
+        }));
 
         // 返回成功响应
         return NextResponse.json<EmployeelistResponse>({
             success: true,
-            data: rows,
+            data: formattedRows,
             total,
             message: '枚举列表获取成功',
         }, { status: 200 });
@@ -89,8 +95,10 @@ export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
 
+        console.log('POST request body:', body);
+
         // 验证必填字段
-        if (!body || !body.name || !body.value) {
+        if (!body || !body.name || !body.sex || !body.description) {
             return NextResponse.json<EnumItemResponse>({
                 success: false,
                 message: '名称和值是必填字段',
@@ -98,8 +106,9 @@ export async function POST(req: NextRequest) {
         }
 
         // 添加时间戳
-        const enumData = {
+        const { id, ...enumData } = {
             ...body,
+            status: 1,
             created_at: new Date(),
             updated_at: new Date(),
         };
@@ -113,10 +122,16 @@ export async function POST(req: NextRequest) {
             [result.insertId]
         );
 
+        // 转换 ID 为字符串，避免 JavaScript 精度丢失
+        const formattedItem = insertedItem[0] ? {
+            ...insertedItem[0],
+            id: insertedItem[0].id.toString()
+        } : undefined;
+
         // 返回成功响应
         return NextResponse.json<EnumItemResponse>({
             success: true,
-            data: insertedItem[0],
+            data: formattedItem,
             message: '枚举项创建成功',
         }, { status: 201 });
     } catch (error) {
@@ -156,10 +171,16 @@ export async function PUT(req: NextRequest) {
             [body.id]
         );
 
+        // 转换 ID 为字符串，避免 JavaScript 精度丢失
+        const formattedItem = updatedItem[0] ? {
+            ...updatedItem[0],
+            id: updatedItem[0].id.toString()
+        } : undefined;
+
         // 返回成功响应
         return NextResponse.json<EnumItemResponse>({
             success: true,
-            data: updatedItem[0],
+            data: formattedItem,
             message: '枚举项更新成功',
         }, { status: 200 });
     } catch (error) {
@@ -201,10 +222,16 @@ export async function DELETE(req: NextRequest) {
         // 删除数据库记录
         await remove('employeelist', { id });
 
+        // 转换 ID 为字符串，避免 JavaScript 精度丢失
+        const formattedItem = itemToDelete[0] ? {
+            ...itemToDelete[0],
+            id: itemToDelete[0].id.toString()
+        } : undefined;
+
         // 返回成功响应
         return NextResponse.json<EnumItemResponse>({
             success: true,
-            data: itemToDelete[0],
+            data: formattedItem,
             message: '枚举项删除成功',
         }, { status: 200 });
     } catch (error) {

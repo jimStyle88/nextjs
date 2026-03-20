@@ -24,7 +24,7 @@ const customRequestHeaders = {
   'X-API-Version': '1.0.0',
   'X-App-Id': 'nextjs-api-demo',
   'X-Platform': 'Web',
-  
+
   // 动态生成的请求头（使用函数）
   'X-Request-Timestamp': () => new Date().toISOString(),
   'X-Request-Id': () => Math.random().toString(36).substr(2, 9),
@@ -53,14 +53,16 @@ function getAllowOrigin(request: NextRequest): string {
 // Next.js 16 Proxy 实现
 // ===============================
 export function proxy(request: NextRequest) {
-  console.log('=== PROXY TRIGGERED ===');
-  console.log('Path:', request.nextUrl.pathname);
-  console.log('Method:', request.method);
-  
+  // 减少控制台日志输出，避免浏览器扩展端口通信问题
+  // console.log('=== PROXY TRIGGERED ===');
+  // console.log('Path:', request.nextUrl.pathname);
+  // console.log('Method:', request.method);
+
   // 1. 处理OPTIONS请求（预检请求）
   if (request.method === 'OPTIONS') {
-    console.log('✓ Handling OPTIONS (preflight) request');
-    
+    // 减少控制台日志输出，避免浏览器扩展端口通信问题
+    // console.log('✓ Handling OPTIONS (preflight) request');
+
     // 创建预检响应
     const preflightResponse = new NextResponse(null, {
       status: 204, // No Content
@@ -71,58 +73,60 @@ export function proxy(request: NextRequest) {
         'Access-Control-Allow-Headers': corsConfig.allowedHeaders.join(','),
         'Access-Control-Allow-Credentials': corsConfig.allowCredentials.toString(),
         'Access-Control-Max-Age': corsConfig.maxAge.toString(),
-        
+
         // 其他标准头
         'Content-Length': '0',
       },
     });
-    
+
+
+
     return preflightResponse;
   }
-  
+
   // 2. 创建新的请求头
   const requestHeaders = new Headers(request.headers);
-  
+
   // 3. 应用自定义请求头
   Object.entries(customRequestHeaders).forEach(([key, value]) => {
     let headerValue: string;
-    
+
     if (typeof value === 'function') {
       headerValue = (value as () => string)();
     } else {
       headerValue = String(value);
     }
-    
+
     requestHeaders.set(key, headerValue);
   });
-  
+
   // 4. 处理API请求
   if (request.nextUrl.pathname.startsWith('/api')) {
     const url = new URL(request.url);
     url.searchParams.set('api_version', '1.0.0');
-    
+
     const apiResponse = NextResponse.rewrite(url, {
       request: { headers: requestHeaders },
     });
-    
+
     // 5. 设置API响应头和CORS头
     apiResponse.headers.set('X-Middleware-Applied', 'true');
     apiResponse.headers.set('Access-Control-Allow-Origin', getAllowOrigin(request));
     apiResponse.headers.set('Access-Control-Allow-Credentials', corsConfig.allowCredentials.toString());
-    
+
     return apiResponse;
   }
-  
+
   // 6. 处理非API请求
   const response = NextResponse.next({
     request: { headers: requestHeaders },
   });
-  
+
   // 7. 设置非API响应头和CORS头
   response.headers.set('X-Middleware-Applied', 'true');
   response.headers.set('Access-Control-Allow-Origin', getAllowOrigin(request));
   response.headers.set('Access-Control-Allow-Credentials', corsConfig.allowCredentials.toString());
-  
+
   return response;
 }
 
