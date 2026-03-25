@@ -33,6 +33,7 @@ const FormPage = () => {
     message.success('表单提交成功！');
   };
 
+
   const onFinishFailed = (errorInfo: FormErrorInfo) => {
     console.log('Form validation failed:', errorInfo);
     message.error('表单验证失败，请检查输入！');
@@ -42,7 +43,7 @@ const FormPage = () => {
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold mb-6 text-gray-800">个人资料表单</h1>
-        
+
         <FormLayout<FormData>
           onFinish={onFinish}
           onFinishFailed={onFinishFailed}
