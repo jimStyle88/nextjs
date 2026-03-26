@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { verifyToken } from '@/lib/auth';
 
 // ===============================
 // 跨域(CORS)配置
@@ -118,6 +119,24 @@ export function proxy(request: NextRequest) {
   }
 
   // 6. 处理非API请求
+  // 不需要认证的路径
+  const publicPaths = ['/login', '/api/auth/login', '/api/auth/register'];
+
+  if (!publicPaths.some(path => request.nextUrl.pathname.startsWith(path))) {
+    // 获取token
+    const token = request.cookies.get('token')?.value;
+
+    if (!token) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+
+    // 验证token
+    const decoded = verifyToken(token);
+    if (!decoded) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+  }
+
   const response = NextResponse.next({
     request: { headers: requestHeaders },
   });
@@ -132,5 +151,13 @@ export function proxy(request: NextRequest) {
 
 // 配置proxy的匹配路径
 export const config = {
-  matcher: ['/api/:path*'],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!_next/static|_next/image|favicon.ico).*)',
+  ],
 };

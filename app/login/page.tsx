@@ -54,7 +54,19 @@ const LoginPage = () => {
     const handleSubmit = async (values: { username: string; password: string }) => {
         setLoading(true);
         try {
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(values),
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error);
+            }
+
             console.log('登录信息:', values);
             message.success('登录成功');
             router.push('/');
