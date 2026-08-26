@@ -78,6 +78,7 @@ const LoginPage = () => {
         }
     };
 
+
     return (
         <div ref={containerRef} className="min-h-screen flex">
             {/* 左边小黄人区域 */}
@@ -234,10 +235,10 @@ const LoginPage = () => {
                     >
                         <Form.Item
                             name="username"
-                            label="账号"
+                            label="登录账号"
                             rules={[
                                 { required: true, message: '请输入账号' },
-                                { min: 3, message: '账号长度至少为3个字符' },
+                                { min: 4, message: '账号长度至少为4个字符' },
                             ]}
                         >
                             <Input
