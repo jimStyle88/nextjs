@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint app lib types proxy.ts",
+    "type-check": "tsc --noEmit",
+    "check": "tsc --noEmit && eslint app lib types proxy.ts"
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.0",
